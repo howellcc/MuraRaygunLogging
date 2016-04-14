@@ -32,7 +32,7 @@ This is a plugin utility that allows you to log Mura error into https://raygun.i
 
 
 ##Tested With
-* Mura CMS Core Version 6.1+
+* Mura CMS Core Version 6.2+
 * Adobe ColdFusion 11
 
 ##License

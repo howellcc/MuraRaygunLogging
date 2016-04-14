@@ -12,15 +12,27 @@ component output="false" displayname="RaygunLogger"  {
 		return this;
 	}
 
-	public function rayGunLog(required string creditCardFilter,required string errorEmail,required any exception,required string passwordFilter,required string fromEmail,required string raygunAPIKey ) {
+	public function rayGunLog(
+			required string creditCardFilter,
+			required string errorEmail,
+			required any exception,
+			required string passwordFilter,
+			required string fromEmail,
+			required string raygunAPIKey,
+			required string sessionid,
+					 string siteID,
+					 string firstName,
+					 string lastName,
+					 string email
+		) {
 		local.error = arguments.exception;
 		local.error = {
-			message = structKeyExists(local.error,"message") ? local.error.message & (structKeyExists(local.error,"RootCause") ? ' : ' & local.error.RootCause.message:'') : "_noMessage",
+			message = arguments.siteID & ': ' & (structKeyExists(local.error,"message") ? local.error.message : "_noMessage"),
 			stackTrace = structKeyExists(local.error,"statckTrace") ? local.error.stackTrace : "_noStackTrace",
 			type = structKeyExists(local.error,"type") ? local.error.type : "_noType",
 			tagcontext = structKeyExists(local.error,"tagcontext") ? local.error.tagcontext : []
 		};
-		
+
 		// replace all occurrences of filter with replacement in raygun4cfml and flattenStruct()
 		local.filter = [
 			{filter = "#arguments.creditCardFilter#", replacement = "__cc__"},
@@ -34,14 +46,38 @@ component output="false" displayname="RaygunLogger"  {
 
 		// these custom values will display in the Params Values section
 		local.paramsData = {
-			"applicationname" = application.applicationname,
-			"domainname" = cgi.http_host,
-			"serverName" = CreateObject("java", "java.net.InetAddress").getLocalHost().getHostName(),
-			"SessionData" = local.sessionData
+			"session" = {
+				"sessionID"= arguments.sessionID,
+				"memberFirstname" = arguments.firstName,
+				"memberLastname" = arguments.lastName,
+				"memberEmail" = arguments.email
+			},
+			"params" = {
+				"applicationname" = application.applicationname,
+				"domainname" = cgi.http_host,
+				"serverName" = CreateObject("java", "java.net.InetAddress").getLocalHost().getHostName()
+			}
 		};
 
 		// Raygun.io reporting
 		local.customRequestData = createObject("component", "RaygunUserCustomData").init(local.paramsData);
+
+		// Setup user tracking
+		local.identifier=len(arguments.email) GT 0 ? arguments.email:arguments.sessionID;
+		local.isAnonymous=len(arguments.email) GT 0 ? false:true;
+		local.UUID=arguments.sessionID;
+		local.email=arguments.email;
+		local.firstName=arguments.firstName;
+		local.fullName=arguments.firstName & ' ' & arguments.lastName;
+
+		local.userIdentifier = createObject("component", "RaygunIdentifierMessage").init(
+			Identifier=local.identifier,
+			isAnonymous=local.isAnonymous,
+			UUID=local.UUID,
+			email=local.email,
+			FirstName=local.firstName,
+			Fullname=local.fullName
+		);
 
 		local.raygun = createObject("component","RaygunClient").init(
 			apiKey = arguments.raygunAPIKey,
@@ -49,7 +85,7 @@ component output="false" displayname="RaygunLogger"  {
 		);
 
 		try {
-		 local.raygun.send(issueDataStruct=local.error,userCustomData=local.customRequestData);
+		 local.raygun.send(issueDataStruct=local.error,userCustomData=local.customRequestData,user=local.userIdentifier);
 		}
 		catch(any e) {
 			savecontent variable="mailBody"{
@@ -95,6 +131,4 @@ component output="false" displayname="RaygunLogger"  {
 		}
 		return arguments.flattened;
 	}
-	
-	
 }

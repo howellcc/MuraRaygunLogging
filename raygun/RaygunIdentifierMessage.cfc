@@ -36,27 +36,27 @@ limitations under the License.
 
 		<cfscript>
 			variables.Identifier = arguments.Identifier;
-			
+
 			if (structKeyExists(arguments,"IsAnonymous")) {
 				variables.IsAnonymous = arguments.IsAnonymous;
 			}
-			
+
 			if (structKeyExists(arguments,"Email")) {
 				variables.Email = arguments.Email;
 			}
-			
+
 			if (structKeyExists(arguments,"FullName")) {
 				variables.FullName = arguments.FullName;
 			}
-			
+
 			if (structKeyExists(arguments,"FirstName")) {
 				variables.FirstName = arguments.FirstName;
 			}
-			
+
 			if (structKeyExists(arguments,"UUID")) {
 				variables.UUID = arguments.UUID;
 			}
-			
+
 			return this;
 		</cfscript>
 
@@ -67,13 +67,13 @@ limitations under the License.
 		<cfscript>
 			var returnContent = {};
 
-			returnContent["Identifier"] = variables.Identifier;
-			returnContent["IsAnonymous"] = variables.IsAnonymous;
-			returnContent["Email"] = variables.Email;
-			returnContent["FullName"] = variables.FullName;
-			returnContent["FirstName"] = variables.FirstName;
-			returnContent["UUID"] = variables.UUID;
-			
+			returnContent["identifier"] = variables.Identifier;
+			returnContent["isAnonymous"] = variables.IsAnonymous;
+			returnContent["email"] = variables.Email;
+			returnContent["fullName"] = variables.FullName;
+			returnContent["firstName"] = variables.FirstName;
+			returnContent["uuid"] = variables.UUID;
+
 			return returnContent;
 		</cfscript>
 
